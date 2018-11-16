@@ -2,18 +2,21 @@ import Formularios
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-from MyDialog import MyInfo, EditarDisciplina
+from MyDialog import MyInfo, EditarDisciplina, IncluirDisciplina
 
 import Aluno
 
-# region aluno
+
+# region ALUNO
 class FormularioAluno(Formularios.Formulario):
-    def __init__(self, root):
-        super().__init__(root)
+    def __init__(self, root, repositorio=None):
+        super().__init__(root, repositorio)
         self.inputs = {}
         self.buttons = {}
         self.prepara_formulario()
         self.ativa_botoes()
+        self.top.after(1, lambda: self.top.focus_force())
+
 
     def prepara_formulario(self):
         self.prepara_inputs()
@@ -21,7 +24,7 @@ class FormularioAluno(Formularios.Formulario):
 
     def prepara_botoes(self):
         nome_frame = 'botoes_aluno'
-        botoes = ['incluir', 'buscar']
+        botoes = ['incluir', 'atualizar', 'buscar']
         self.prepara_frame_botoes('botoes_aluno', botoes)
         self.frames[nome_frame].pack(padx=(10, 10), pady=(10, 10))
 
@@ -34,6 +37,7 @@ class FormularioAluno(Formularios.Formulario):
     def ativa_botoes(self):
         self.buttons["buscar"].config(command=self.botao_busca)
         self.buttons["incluir"].config(command=self.botao_incluir)
+        self.buttons["atualizar"].config(command=self.botao_atualizar)
 
     def obtem_dados_do_formulario(self):
         nome = self.inputs['nome'].get()
@@ -63,18 +67,21 @@ class FormularioAluno(Formularios.Formulario):
         alunoEncontrado = None
         if (rbuha):
             if not (rbuha == "andre" or rbuha == "joao"):
+                print("\n buscando rbuha %s..." % rbuha)
                 alunoEncontrado = self.busca_por_rbuha(rbuha)
             if rbuha == "andre":
                 alunoEncontrado = Aluno.andre
             if rbuha == "joao":
                 alunoEncontrado = Aluno.joao
-        if (ra):
+
+        elif ra:
             alunoEncontrado = self.busca_por_ra(ra, universidade)
+
         if alunoEncontrado is None:
             MyInfo(self.top, "Não foi possível localizar o aluno solicitado.")
+            print(self.repo.alunos)
         else:
             self.abre_janela_disciplinas(alunoEncontrado)
-
 
     def botao_incluir(self):
         nome, universidade, ra, rbuha = self.obtem_dados_do_formulario()
@@ -82,51 +89,77 @@ class FormularioAluno(Formularios.Formulario):
             MyInfo(self.top, "Por favor, preencha: Nome, Universidade e RA.")
             return
         if rbuha:
-            MyInfo(self.top, "O sistema calculará o valor do Registro Buha automaticamente.\n" +
-                   "Por favor preencha apenas Nome, Universidade e RA.")
+            MyInfo(self.top, self.text['incluir erro buha'])
             txtRbuha = self.inputs['rbuha']
             txtRbuha.delete(0, len(txtRbuha.get()))
 
             return
         rbuha = self.calcula_rbuha(universidade, ra)
-        aluno = Aluno.Aluno(nome, universidade, ra, rbuha, None)
-        mensagem = "Aluno Incluído: "+nome+" ("+universidade+")"
-        mensagem += "\nRA("+ra+")\nRBuha("+rbuha+")"
+        aluno = Aluno.Aluno(nome, universidade, ra, rbuha, [])
+        mensagem = self.texts['aluno incluido'].format(*aluno)
         MyInfo(self.top, mensagem)
+        self.repo.inserir_aluno(aluno)
 
-        # TODO Essa função deverá incluir o aluno na CHORD.
 
     def busca_por_rbuha(self, rbuha):
-        #TODO Realiza uma busca real no CHORD.
-        print("A implementar busca por rbuha.")
-        for i in range(10000 * 10):
-            print(str(i))
-        return None
+        return self.repo.obtem_aluno_por_rbuha(rbuha)
 
     def busca_por_ra(self, ra, universidade):
         return self.busca_por_rbuha(self.calcula_rbuha(universidade, ra))
 
+    def botao_atualizar(self):
+        aluno = self.obtem_dados_do_formulario()
+        if (self.valida_dados(nome=True, universidade=True, ra=True, rbuha=True)):
+            anterior = self.repo.obtem_aluno_por_rbuha(aluno[3])
+            novo = Aluno.Aluno(aluno[0], aluno[1], aluno[2], aluno[3], None)
+
+            if not anterior:
+                MyInfo(self.top, "Não existe estudante com esse Registro BUHA. Utilize Incluir.")
+                return
+
+            mensagem = "ESSE PROCEDIMENTO NÃO PODE SER DESFEITO!\n"
+            mensagem += self.texts['confirmar edicao aluno']
+            mensagem += "\nESSE PROCEDIMENTO NÃO PODE SER DESFEITO!"
+
+            tupla_para_mensagem = anterior[0:-1] + novo[0:-1]
+
+            mensagem = mensagem.format(*tupla_para_mensagem)
+
+            confirmacao = messagebox.askokcancel("Atenção", mensagem)
+            if confirmacao:
+                self.repo.editar_aluno(anterior, novo)
+            else:
+                MyInfo(self.top, "Alteração Cancelada.")
+        else:
+            MyInfo(self.top, self.texts['preencher todos os campos'])
+
+    def valida_dados(self, nome=False, universidade=False, ra=False, rbuha=False):
+        nome_f, univ_f, ra_f, rbuha_f = self.obtem_dados_do_formulario()
+        is_nome_ok = nome_f if nome else True
+        is_univ_ok = univ_f if universidade else True
+        is_ra_ok = ra_f if ra else True
+        is_rbuha_ok = rbuha_f if rbuha else True
+        return is_nome_ok and is_univ_ok and is_ra_ok and is_rbuha_ok
+
     def abre_janela_disciplinas(self, aluno):
-        f = FormularioDisciplinas(self._root_reference)
+        f = FormularioDisciplinas(self._root_reference, self.repo)
         f.set_aluno(aluno)
         self.destroy()
         print("Encerrado Formulario Alunos")
 
     def calcula_rbuha(self, universidade, ra):
-        #TODO: Calcula um hash da universidade+ra
-        return str(universidade)+'-'+str(ra)
+        # TODO: Calcula um hash da universidade+ra
+        return str(universidade) + str(ra)
 
-# end region
 
 # region DISCIPLINAS
 class FormularioDisciplinas(Formularios.Formulario):
-    def __init__(self, root, aluno=Aluno.andre):
-        super().__init__(root)
+    def __init__(self, root, repositorio=None, aluno=Aluno.andre):
+        super().__init__(root, repositorio)
         self.hist_tree = None
         self.aluno = aluno
+        self.aluno_salvo = Aluno.copia_aluno(aluno)
         self.prepara_formulario()
-
-
 
     def prepara_formulario(self):
         self.prepara_frame_subtitulo('HISTÓRICO', 16)
@@ -141,7 +174,6 @@ class FormularioDisciplinas(Formularios.Formulario):
         self.frames['botoes'].pack(anchor='c', padx=10, pady=(5, 0))
         self.frames['historico'].pack(side=BOTTOM, padx=10, pady=10)
 
-
     def prepara_frame_subtitulo(self, subtitulo, tamanho):
         frame = Frame(self.top, )
         fonte = 'Arial'
@@ -154,7 +186,7 @@ class FormularioDisciplinas(Formularios.Formulario):
     def prepara_frame_aluno(self, nome_frame):
         frame = LabelFrame(self.top, text=self.texts['estudante'])
         fonte = ('Arial', 10)
-        aluno = self.aluno;
+        aluno = self.aluno
         nome = ttk.Label(frame, text=aluno.nome, font=fonte)
         universidade = ttk.Label(frame, text=aluno.universidade, font=fonte)
 
@@ -171,20 +203,21 @@ class FormularioDisciplinas(Formularios.Formulario):
     def prepara_frame_historico(self, nome_frame):
         frame = Frame(self.top)
         tree = self.obtem_tabela(frame, self.aluno)
-        yScroll = ttk.Scrollbar(frame, orient="vertical")
-        xScroll = ttk.Scrollbar(frame, orient="horizontal")
-        # yScroll.pack(side=RIGHT, fill=Y)
-        # xScroll.pack(side=BOTTOM, fill=X)
-
+        # scrollbar(frame, tree)
         tree.pack()
-        # xScroll.config (command = tree.xview())
-        # yScroll.config(command=tree.yview())
-        # tree.config(yscrollcommand=yScroll.set)
-        # tree.config(xscrollcommand=xScroll.set)
         self.hist_tree = tree
         tree.bind("<<TreeviewSelect>>", self.tree_click_event)
-
         self.frames[nome_frame] = frame
+
+    def scrollbar(self, parent, tree):
+        yScroll = ttk.Scrollbar(parent, orient="vertical")
+        xScroll = ttk.Scrollbar(parent, orient="horizontal")
+        yScroll.pack(side=RIGHT, fill=Y)
+        xScroll.pack(side=BOTTOM, fill=X)
+        xScroll.config(command=tree.xview())
+        yScroll.config(command=tree.yview())
+        tree.config(yscrollcommand=yScroll.set)
+        tree.config(xscrollcommand=xScroll.set)
 
 
     def tree_click_event(self, event):
@@ -195,46 +228,53 @@ class FormularioDisciplinas(Formularios.Formulario):
         # print(t, "-", row,"--", focus)
 
     def obtem_tabela(self, frame, aluno):
-        historico = aluno.historico
-        quantidade_de_materias = len(historico)
-
         largura_maxima = 600
-        largura_colunas = (0.3 * largura_maxima,
-                           0.15 * largura_maxima,
-                           0.15 * largura_maxima,
-                           0.1 * largura_maxima,
-                           0.2 * largura_maxima)
-        nome_colunas = ("Disciplina", "Código", "Carga Horária", "Nota", "Conclusão")
+        largura_colunas = (0.3 * largura_maxima, 0.15 * largura_maxima,
+                           0.15 * largura_maxima, 0.1 * largura_maxima, 0.2 * largura_maxima)
+
+        nomes_colunas = ("Disciplina", "Código", "Carga Horária", "Nota", "Conclusão")
+
+        tree = ttk.Treeview(frame, selectmode="browse")
 
         # Estou adicionando +4 colunas(a #0 já tenho por padrão)
-        tree = ttk.Treeview(frame,
-                            columns=('#1', '#2', '#3', '#4'))
+        tree.config(columns=('#1', '#2', '#3', '#4'))
 
-        for i in range(5):
-            tree.heading("#" + str(i), text=nome_colunas[i], anchor='w')
+        # Define o nome e tamanho das colunas:
+        for i in range(len(largura_colunas)):
+            tree.heading("#" + str(i), text=nomes_colunas[i], anchor='w')
             tree.column("#" + str(i), width=int(largura_colunas[i]))
-            # print("Alterado tamanho da col "+str(i)+" para "+str(largura_colunas[i]))
 
-        index = 0
-        for disc in historico:
-            # print("Adicionando "+str(disc))
-            print(disc.nome)
-            print(index)
-            tree.insert("", "end", iid=index, text=disc.nome, values=disc[1:])
-            index += 1
-
-
+        self.atualiza_tabela(tree, self.aluno)
         return tree
 
+    def atualiza_tabela(self, tree, aluno):
+        # Deleta o conteudo da tabela:
+        for disc in tree.get_children():
+            tree.delete(disc)
+
+        # Adiciona as disciplinas no histórico
+        historico = aluno.historico
+        index = 0
+        if historico is None:
+            return
+        else:
+            for disc in historico:
+                tree.insert("", "end", iid=index, text=disc.nome, values=disc[1:])
+                index += 1
+
+
+
+
+
     def obtem_botoes(self):
-        self.prepara_frame_botoes('botoes', ['incluirDisc', 'removerDisc', 'editarDisci', 'salvar', 'reverter'])
+        self.prepara_frame_botoes('botoes', ['incluirDisc', 'removerDisc', 'editarDisci', 'salvar', 'reverter', 'sair'])
 
     def set_aluno(self, novo_aluno):
-        print("Setting novo aluno: "+str(novo_aluno))
-        self.aluno = novo_aluno
+        print("Aluno Salvo: %s" % str(self.aluno_salvo))
+        print("Aluno Novo Aluno: %s" % str(novo_aluno))
+        self.aluno = Aluno.copia_aluno(novo_aluno)
         self.reset()
 
-        print("Novo Aluno")
 
     def reset(self):
         for key, frame in self.frames.items():
@@ -242,30 +282,34 @@ class FormularioDisciplinas(Formularios.Formulario):
         self.prepara_formulario()
 
     def ativar_botoes(self):
-        nomes_botoes = ('incluirDisc', 'removerDisc', 'editarDisci', 'salvar', 'reverter')
-        funcoes_botoes = (self.botao_novo, self.botao_remover, self.botao_editar, self.botao_salvar, self.botao_cancelar);
+        nomes_botoes = ('incluirDisc', 'removerDisc', 'editarDisci', 'salvar', 'reverter', 'sair')
+        funcoes_botoes = (
+            self.botao_novo, self.botao_remover, self.botao_editar, self.botao_salvar, self.botao_cancelar,
+            self.botao_sair)
         self.conecta_botoes(nomes_botoes, funcoes_botoes)
-
 
     def get_selected_index(self):
         index = self.hist_tree.focus()
-        if index=="I001":
+        if "I" in index:
             print("Index inicial -> Linha 0")
-            index = 0;
+            index = 0
         return int(index)
 
-    def botao_novo(self):
-        print("Novo")
-        pass
+    def get_index_iid(self, index):
+        if index == 0:
+            return "I001"
+        else:
+            return str(index)
 
+    def botao_novo(self):
+        IncluirDisciplina(self.top, self)
+        pass
 
     def botao_remover(self):
-        print("Remover")
-        print(self.get_selected_index())
-        pass
+        Aluno.remove_disciplina(self.aluno, self.get_selected_index())
+        self.atualiza_tabela(self.hist_tree, self.aluno)
 
     def botao_editar(self):
-
         index = self.get_selected_index()
         print("Editando. Start")
         EditarDisciplina(self.top, self, index)
@@ -274,14 +318,19 @@ class FormularioDisciplinas(Formularios.Formulario):
 
     def botao_salvar(self):
         print("Salvar")
-        #TODO Essa função deverá salvar as alterações na CHORD.
+        self.repo.editar_aluno(self.aluno, self.aluno)
+        self.aluno_salvo = Aluno.copia_aluno(self.aluno)
         pass
 
     def botao_cancelar(self):
-        self.abrir_formulario_alunos();
+        self.set_aluno(self.aluno_salvo)
+        self.abrir_formulario_alunos()
+
+    def botao_sair(self):
+        self.abrir_formulario_alunos()
 
     def abrir_formulario_alunos(self):
-        f = FormularioAluno(self._root_reference)
+        f = FormularioAluno(self._root_reference, self.repo)
         self.destroy()
 
 # end region

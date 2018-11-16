@@ -1,6 +1,9 @@
 from tkinter import *
 from tkinter import ttk
 import tkinter as tk
+import RepositorioDeAlunos as Repositorio
+import MyDialog
+
 from tkinter.ttk import Entry
 
 # Chaves #
@@ -19,10 +22,14 @@ from tkinter.ttk import Entry
 'editarDisci'
 '''
 class Formulario(object):
-    def __init__(self, root):
+    def __init__(self, root, repositorio=None):
         print("Inicializando formulario.")
         self.top = tk.Toplevel(root)
         self._root_reference = root
+        if repositorio is None:
+            self.repo = Repositorio.Repositorio()
+        else:
+            self.repo = repositorio
 
         self.texts = {}
         self.frames = {}
@@ -31,26 +38,9 @@ class Formulario(object):
         self.prepara_textos()
         self.prepara_header()
 
-
     def prepara_textos(self):
-        self.texts['titulo'] = "Base Unificada de Histórico Acadêmico"
-        self.texts['estudante'] = "Estudante"
+        self.texts = MyDialog.get_strings()
 
-        self.texts['nome'] = "Nome do Aluno"
-        self.texts['universidade'] = "Universidade"
-        self.texts['ra'] = "Registro na Universidade"
-        self.texts['rbuha'] = "Registro BUHA"
-        self.texts['historico'] = "Histórico"
-
-        self.texts['buscar'] = "Encontrar Aluno"
-        self.texts['incluir'] = "Incluir Aluno"
-        self.texts['atualizar'] = "Atualizar Aluno"
-        self.texts['incluirDisc'] = "Nova Disciplina"
-        self.texts['removerDisc'] = "Remover Disciplina"
-        self.texts['editarDisci'] = "Editar Disciplina"
-
-        self.texts['salvar'] = "Salvar"
-        self.texts['reverter'] = "Cancelar"
 
     def prepara_header(self,):
         fonte = 'Arial'
