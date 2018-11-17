@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from tkinter import *
 from tkinter import ttk
 import Aluno
@@ -23,7 +24,7 @@ strings = {
     'reverter': "Cancelar",
     'sair': "Sair",
 
-    'inserir erro buha': """O sistema calculará o valor do Registro Buha automaticamente. 
+    'incluir erro buha': """O sistema calculará o valor do Registro Buha automaticamente. 
     Por favor preencha apenas Nome, Universidade e RA.""",
 
     'confirmar edicao aluno': """Você tem certeza que deseja alterar o aluno abaixo:
@@ -40,20 +41,6 @@ strings = {
 def get_strings():
     return strings.copy()
 
-class MyDialog:
-    def __init__(self, parent):
-
-        top = self.top = Toplevel(parent)
-        ttk.Label(top, text="Value").pack()
-
-        self.e = ttk.Entry(top)
-        self.e.pack(padx=5)
-
-        b = ttk.Button(top, text="OK", command=self.ok)
-        b.pack(pady=5)
-
-    def ok(self):
-        self.top.destroy()
 
 class MyInfo:
     def __init__(self, parent, message):
@@ -62,6 +49,12 @@ class MyInfo:
 
         b = ttk.Button(top, text="OK", command=self.ok)
         b.pack(pady=5)
+        b.focus_set()
+
+        self.top.lift()
+        self.top.focus_force()
+        self.top.bind('<Return>', lambda e: self.ok())
+
 
     def ok(self):
         self.top.destroy()
@@ -89,6 +82,13 @@ class EditarDisciplina:
         b2 = ttk.Button(top, text="Cancelar", command=self.cancelar)
         b.pack(pady=5)
         b2.pack(pady=5)
+
+        self.top.lift()
+        self.top.focus_force()
+        b.focus_set()
+        self.top.bind('<Return>', lambda e: self.ok())
+
+
 
     def prepara_campos(self, disciplina):
         currRow = 0
@@ -146,6 +146,13 @@ class IncluirDisciplina:
         b2 = ttk.Button(top, text="Cancelar", command=self.cancelar)
         b.pack(pady=5)
         b2.pack(pady=5)
+
+        self.top.lift()
+        self.top.focus_force()
+        b.focus_set()
+        self.top.bind('<Return>', lambda e: self.ok())
+
+
 
     def prepara_campos(self, disciplina):
         currRow = 0

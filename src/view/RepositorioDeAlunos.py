@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Aluno import Aluno, Disciplina
 import Aluno as A
 
@@ -33,7 +34,7 @@ class Repositorio:
             return False
         else:
             self.alunos.append(aluno)
-            print(self.alunos)
+            # print(self.alunos)
             return True
 
     def remover_aluno(self, aluno):

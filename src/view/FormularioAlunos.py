@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import Formularios
 from tkinter import *
 from tkinter import ttk
@@ -89,7 +90,7 @@ class FormularioAluno(Formularios.Formulario):
             MyInfo(self.top, "Por favor, preencha: Nome, Universidade e RA.")
             return
         if rbuha:
-            MyInfo(self.top, self.text['incluir erro buha'])
+            MyInfo(self.top, self.texts['incluir erro buha'])
             txtRbuha = self.inputs['rbuha']
             txtRbuha.delete(0, len(txtRbuha.get()))
 

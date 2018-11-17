@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from collections import namedtuple
 
 Aluno = namedtuple('Aluno', ['nome', 'universidade', 'ra', 'rbuha', 'historico'])

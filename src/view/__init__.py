@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import FormularioAlunos as fa
 from tkinter import Tk
 import tkinter as tk
