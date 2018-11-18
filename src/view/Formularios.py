@@ -2,10 +2,8 @@
 from tkinter import *
 from tkinter import ttk
 import tkinter as tk
-import RepositorioDeAlunos as Repositorio
-import MyDialog
-
-from tkinter.ttk import Entry
+import model.Repositorio as Repositorio
+import view.Popups as Popups
 
 # Chaves #
 '''
@@ -40,7 +38,7 @@ class Formulario(object):
         self.prepara_header()
 
     def prepara_textos(self):
-        self.texts = MyDialog.get_strings()
+        self.texts = Popups.get_strings()
 
 
     def prepara_header(self,):

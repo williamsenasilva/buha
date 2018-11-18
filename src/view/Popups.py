@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from tkinter import *
 from tkinter import ttk
-import Aluno
+import model.Aluno as Aluno
 
 strings = {
     'titulo': "Base Unificada de Histórico Acadêmico",

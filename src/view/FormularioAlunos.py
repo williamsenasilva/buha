@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-import Formularios
+import view.Formularios as Formularios
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-from MyDialog import MyInfo, EditarDisciplina, IncluirDisciplina
+from view.Popups import MyInfo, EditarDisciplina, IncluirDisciplina
 
-import Aluno
+import model.Aluno as Aluno
 
 
 # region ALUNO

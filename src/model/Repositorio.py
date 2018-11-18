@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from Aluno import Aluno, Disciplina
-import Aluno as A
+from model.Aluno import Aluno, Disciplina
 
 
 class Repositorio:
