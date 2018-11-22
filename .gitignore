@@ -1,3 +1,4 @@
 *.pyc
 src/webapp/__pycache__/
+venv/
 # src/webapp/static/vendor/ 
