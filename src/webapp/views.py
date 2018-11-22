@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, redirect, url_for, flash, Markup, session, send_file, json, jsonify
+import requests
 import os
 import glob
 import calendar
@@ -8,6 +9,7 @@ from random import randint
 from dht import Node, DHT
 from helper import *
 import ast 
+import random
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -70,6 +72,7 @@ def insert_student():
     student = Student(data)
 
     dht = create_dht(session)
+    student.buha_id = dht.get_hash_id(student.academic_id)
     dht.store(dht.start_node, student.academic_id, student)
 
     new_file = app.root_path + '/static/dht/' + session.get('moment') + '/' + str(dht.find_node(dht.start_node, student.academic_id)._id) + '/' + str(student.academic_id) + '.txt'
@@ -79,9 +82,24 @@ def insert_student():
     flash(message,'success')
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
 
+@app.route('/api/insert-students',methods=['POST'])
+def insert_students():
+    students = random.sample(app.config['STUDENTS'], 100)
+    for student in students:
+        student = Student(student)
+        dht = create_dht(session)
+        student.buha_id = dht.get_hash_id(student.academic_id)
+        dht.store(dht.start_node, student.academic_id, student)
+        new_file = app.root_path + '/static/dht/' + session.get('moment') + '/' + str(dht.find_node(dht.start_node, student.academic_id)._id) + '/' + str(student.academic_id) + '.txt'
+        create_file(new_file, str(student.__dict__))
+    message = Markup("100 alunos foram inseridos")
+    flash(message,'success')
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+
 @app.route('/api/insert-server',methods=['POST'])
 def insert_server():
-    new_folder = app.root_path + '/static/dht/' + session.get('moment') + '/' + str(int(time.time()))
+    new_folder = app.root_path + '/static/dht/' + session.get('moment') + '/' + str(randint(0,1024))
     if not os.path.exists(new_folder):
         os.makedirs(new_folder)
     
@@ -91,9 +109,10 @@ def insert_server():
     flash(message,'success')
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
 
+
 # todo: mover para helper.py
 def create_dht(session):
-    dht = DHT(5)
+    dht = DHT(10)
     path = app.root_path + '/static/dht/' + str(session.get('moment'))
     for root, dirs, files in os.walk(path, topdown=False):
         for name in dirs:

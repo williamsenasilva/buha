@@ -1,16 +1,6 @@
 import os
 from views import app
 
-''' Adiciona a página static no monitoramento do use_reloader=True '''
-extra_dirs = ['static','templates']
-extra_files = extra_dirs[:]
-for extra_dir in extra_dirs:
-    for dirname, dirs, files in os.walk(extra_dir):
-        for filename in files:
-            filename = os.path.join(dirname, filename)
-            if os.path.isfile(filename):
-                extra_files.append(filename)
-
 if __name__ == '__main__':
     try:
         with app.app_context():
