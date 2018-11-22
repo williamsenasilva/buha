@@ -3,7 +3,6 @@ import os
 import glob
 import calendar
 import time
-from datetime import datetime
 from models import *
 from random import randint
 from dht import Node, DHT
@@ -19,32 +18,23 @@ unixtime = int(time.time())
 def home():
     if not session.get('logged'):
         return render_template('home.html',unixtime=unixtime)
-    
     dht = create_dht(session)
-
     base_path = app.root_path + '/static/dht/'
     session_path = base_path + session.get('moment')
     tree = str(make_tree(session_path))
-    # remove caminho do diretório
     tree = tree.replace(base_path,'')
-    # converte novamente para tipo dict
     tree = ast.literal_eval(tree)
-
     return render_template('home.html',session=session, tree=tree,unixtime=unixtime)
 
 @app.route('/login')
 def login():
     dht = create_dht(session)
-
     session['logged'] = True
     session['moment'] = str(int(time.time()))
-    
     new_folder = app.root_path + '/static/dht/' + session.get('moment')
     if not os.path.exists(new_folder):
         os.makedirs(new_folder)
         os.makedirs(new_folder+'/'+str(0))
-        # for i in range(10):
-        #     os.makedirs(new_folder+'/'+str(i))
     return redirect(url_for('home'))
 
 @app.route('/logout')
@@ -58,30 +48,6 @@ def logout():
     os.rmdir(path_to_exclude)
     session.clear()
     return redirect(url_for('home'))
-
-@app.route('/update-student',methods=['POST'])
-def update_student():
-    if not student:
-        message = Markup('produto de código <b>%s</b> não foi encontrado.'%(request.form['code'].upper()))
-        flash(message,'danger')
-        return redirect(url_for('list_students'))
-    student.description = request.form['description'].upper()
-    student.price = request.form['price']
-    student.quantity = request.form['quantity']
-    message = Markup('produto de código <b>%s</b> foi atualizado.'%(request.form['code'].upper()))
-    flash(message,'info')
-    return redirect(url_for('list_students'))
-
-@app.route('/delete-student/<code>',methods=['GET'])
-def delete_student(code):
-    if not student:
-        message = Markup('produto de código <b>%s</b> não foi encontrado.'%(code.upper()))
-        flash(message,'danger')
-        return redirect(url_for('list_students'))
-    Student.query.filter_by(code=code).delete()
-    message = Markup('produto de código <b>%s</b> foi removido.'%(code.upper()))
-    flash(message,'warning')
-    return redirect(url_for('list_students'))
 
 @app.route('/files/', defaults={'request_path': ''})
 @app.route('/files/<path:request_path>')
@@ -125,6 +91,7 @@ def insert_server():
     flash(message,'success')
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
 
+# todo: mover para helper.py
 def create_dht(session):
     dht = DHT(5)
     path = app.root_path + '/static/dht/' + str(session.get('moment'))
