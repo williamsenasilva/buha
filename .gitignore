@@ -1,0 +1,3 @@
+*.pyc
+src/webapp/__pycache__/
+src/webapp/static/vendor/

@@ -1,0 +1,1 @@
+{'name': 'sddsa', 'university': 'mackenzie', 'academic_id': 123456786, 'buha_id': None}

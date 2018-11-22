@@ -1,0 +1,29 @@
+{
+  "name": "buha",
+  "authors": [
+    "andré <a.barbosa@aluno.ufabc.edu.br>",
+    "iasmin <iasmin.haro@aluno.ufabc.edu.br>",
+    "luiz <al.luiz@live.com>",
+    "paulo <paulo.martins@aluno.ufabc.edu.br>",
+    "pedro <pedro-porto@hotmail.com>",
+    "william <williamsenasilva@yahoo.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^4.1.0",
+    "datatables": "^1.10.16",
+    "font-awesome": "^4.7.0",
+    "jstree-bootstrap-theme": "^1.0.2",
+    "jquery-ui": "^1.12.1"
+  }
+}

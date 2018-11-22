@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <!-- head -->
+  <head>
+  {% block head %}
+    <!-- meta -->
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
+    <meta content="no-cache" http-equiv="Pragma"/>
+    <meta content="0" http-equiv="Expires"/>
+    <!-- _meta -->
+    <!-- style -->
+    <link href="{{ url_for('static', filename='vendor/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/datatables/media/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendor/jstree-bootstrap-theme/dist/themes/proton/style.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}?{{unixtime}}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='img/icon.png') }}" rel="shortcut icon">
+    <!-- _style -->
+    <!-- scripts -->
+    <script src="{{ url_for('static', filename='vendor/jquery/dist/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/datatables/media/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/datatables/media/js/dataTables.bootstrap4.min.js') }}"></script>
+    <script language="javascript" type="text/javascript" src="{{ url_for('static', filename='vendor/jstree-bootstrap-theme/dist/jstree.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}?{{unixtime}}" type="text/javascript"></script>
+
+    <!-- _scripts -->
+    <title>
+    {% block title %}
+      BUHA
+      {% block subtitle %}{% endblock %}
+    {% endblock %}
+    </title>
+  {% endblock %}
+  </head>
+  <body>
+  {% block body %}
+    <div class="container-fluid">
+      {% block navbar %}
+        {% include 'navbar.html' %}
+      {% endblock %}
+      {% block container %}
+      {% endblock %}
+    </div>
+  {% endblock %}
+  </body>
+</html>

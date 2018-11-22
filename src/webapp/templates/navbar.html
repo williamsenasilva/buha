@@ -1,0 +1,90 @@
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="navbar">
+    <div class="container">
+        <a class="navbar-brand js-scroll-trigger" href="{{url_for('home')}}">
+            <span class="fa fa-graduation-cap"></span> BUHA
+        </a>
+        <button aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler navbar-toggler-right" data-target="#navbarResponsive" data-toggle="collapse" type="button">
+            <i class="fa fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                {% if session.get('logged')%}
+                <li class="nav-item">
+                    <a class="nav-link" data-target="#modal-insert-student" data-toggle="modal" href="">
+                        <span class="fa fa-user"></span> Inserir aluno
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="insert-server" href="#">
+                        <span class="fa fa-server"></span> Inserir servidor
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('logout')}}">
+                        <span class="fa fa-sign-out"></span> logout
+                    </a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{url_for('login')}}">
+                        <span class="fa fa-sign-in"></span> login
+                    </a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="https://github.com/williamsenasilva/buha" target="_blank" title="código fonte do projeto">
+                        <span class="fa fa-github"></span> GitHub
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- modal-insert-student -->
+<div class="modal fade" id="modal-insert-student" role="dialog">
+  <div class="modal-dialog">
+    <!-- modal-content -->
+    <div class="modal-content">
+      <form id="form-insert-student" onsubmit="return insertStudent()">
+        <div class="modal-header">
+          <h4 class="modal-title">
+            Novo aluno
+          </h4>
+          <button class="close" data-dismiss="modal" type="button">
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>
+              Nome *
+            </label>
+            <input class="form-control" id="input-name" placeholder="Digite o nome do aluno" required="true" size="25%">
+            </input>
+          </div>
+          <div class="form-group">
+            <label>
+              Universidade *
+            </label>
+            <input class="form-control" id="input-university" placeholder="Digite o nome da universidade" required="true" size="25%">
+            </input>
+          </div>
+          <div class="form-group">
+            <label>
+              Registro acadêmico *
+            </label>
+            <input class="form-control" id="input-academic-id" placeholder="Digite o registro acadêmico" required="true" size="25%">
+            </input>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <input class="btn btn-warning btn-lg" type="submit" value="Enviar">
+          </input>
+        </div>
+      </form>
+    </div>
+    <!-- _modal-content -->
+  </div>
+</div>
+<!-- _modal-insert-student -->

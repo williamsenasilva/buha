@@ -1,0 +1,135 @@
+{% extends "layout.html" %}
+{% block subtitle %}Home{% endblock %}
+{% block container %}
+
+  <div id="server-message">
+    {% for alert,message in get_flashed_messages(with_categories=true) %}
+      {% if alert == "success" %}
+        <div class="alert alert-success fade-in">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {{message}}
+        </div>  
+      {% elif alert == "info" %}
+        <div class="alert alert-info fade-in">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {{message}}
+        </div>  
+      {% elif alert == "warning" %}
+        <div class="alert alert-warning fade-in">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {{message}}
+        </div>  
+      {% elif alert == "danger" %}
+        <div class="alert alert-danger fade-in">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {{message}}
+        </div>  
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% if not session.get('logged') %}
+    <h4>Redes estruturadas</h4>
+    <p>
+      Pares e recursos são organizados seguindo algoritmos e critérios específicos. Possuem protocolos que garantem que qualquer nó possa encaminhar uma busca a outro nó que tenha o arquivo desejado. Esse protocolo normalmente é um DHT (Distributed Hash Tables) , que atribui a posse de cada arquivo a um par.  O DHT também é usado para indexar os arquivos e buscas.
+    </p>
+
+    <h4>DHT</h4>
+    <p>
+      São uma classe de sistemas distribuídos descentralizados que provém um serviço de busca parecida com a de uma tabela de hash: pares (key,value) são armazenados no DHT e qualquer nó pode recuperar o valor associado a cada chave. A responsabilidade por manter o mapa das chaves até os valores é distribuída entre os nós de modo que uma mudança no grupo de nós cause uma interrupção mínima. Isso permite que o DHT funcione para uma grande escala de nós com estes chegando, saindo e falhando continuamente.
+
+      Ele foi criado para reunir as vantagens dos sistemas de buscas do Napster e da Gnutella. No Napster, ao entrar na rede, cada nó enviava ao servidor central uma lista dos arquivos que possuia. O servidor, então se encarregava de fazer as buscas no seu banco de dados. Era muito eficiente, mas tornava o Napster vulnerável à ataques judiciais, pois permitia provar que a rede guardava e direcionava arquivos ilegais. A Gnutella usava um modelo de inundação no qual, quando a busca era feita, todas as máquinas conectadas à rede recebiam uma mensagem solicitando o determinado arquivo. Esse método era muito menos eficiente, pois tornava a comunicação lenta. Era preciso criar um sistema que tivesse a mesma eficiência do Napster, mas que fosse descentralizado. Um problema do DHT é que ele só realiza buscas pelo nome exato do arquivo ao invés de usar palavras-chave.
+    </p>
+
+    <h4>Estrutura do DHT</h4>
+    <p>
+      Existe um keyspace abstrato, que corresponde a um conjunto de strings de 128 ou 160 bits. Um esquema de partição do keyspace divide a posse deste entre os nós participantes.Uma rede sobreposta conecta os nós, permitindo que qualquer um possa encontrar o dono de uma certa chave. Para armazenar um arquivo no DHT, faz-se o hash do nome do arquivo, produzindo uma chave k de 128 ou 160 bits. Uma mensagem put(k,data) é enviada de nó em nó pela rede sobreposta até chegar ao nó ao qual foi delegada a posse da chave k na partição do keyspace. Esse nó guarda a chave e os dados. Para buscar o arquivo, basta fazer o hash do nome do arquivo para gerar a chave k e a mensagem get(k). Essa mensagem também é enviada de nó em nó até chegar naquele que possui k, que responderá enviando os dados.
+
+      Os DHTs usam um variante de hashing consistente (no qual uma pequena alteração no nome não altera significativamente o hash) que utiliza uma função f(k1, k2) que define uma distância abstrata entre k1 e k2, que não tem a ver com a distância geográfica nem com o tempo de latência. Cada nó recebe um identificador (ID). Se um nó recebe um ID x, ele recebe todas as chaves km para as quais x é o ID mais próximo (por exemplo, o Chord, um dos protocolos DHT mais usados, usa um círculo no sentido horário), que é calculado por f(km,x).
+
+      A escolha de quem possuirá k varia, mas todos tem um princípio básico: será escolhido um nó que tenha k em seu ID ou que tenha ligação com um nó que tenha o ID mais parecido com k. è utilizado, então, um algoritmo para encontrar esse nó. Esse tipo de roteamento é chamado key-based routing.
+
+    </p>
+  {% else %}
+    <form class="form-inline">
+      <h2>
+        Simulação para {{session.get('moment')}}
+        {% if session.type in ['sobressalentes','admin'] %}
+        <button type="button" data-target="#modal-update-manual-{{session.project}}" data-toggle="modal" id="button-edit-manual-{{session.project}}" class="btn btn-warning form-control form-inline">
+          <span class="fa fa-edit"></span>editar
+        </button>
+        {% endif %}
+      </h2>
+    </form>
+    
+    <div id="tree">
+      <ul>
+        {% for item in tree.children recursive %}
+          {% set path = item.name[:item.name.rindex('/')+1] %}
+          {% set name = item.name[item.name.rindex('/')+1:] %}
+          {% set url = url_for('files') + path+name %}
+          {% if '.txt' in name %}
+            <li data-jstree='{ "icon" : "fa fa-file-text-o" }'>
+              <span onClick='javascript:window.open("{{url}}","_blank")'>{{name}}</span>
+          {% else %}
+            <li>
+               <b> {{name}} </b>
+          {% endif %}
+          {% if item.children %}
+            <ul>
+              {{ loop(item.children) }}
+            </ul>
+          {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $('#tree').jstree({
+          'core': {
+            'themes': {
+              'name': 'proton',
+              'responsive': true
+            }
+          },
+          'plugins' : [ "types" ],
+          'types' : {
+            'default' : {
+              'icon' : 'fa fa-folder-o'
+            },
+            'f-open' : {
+              'icon' : 'fa fa-folder-open-o'
+            },
+            'f-closed' : {
+              'icon' : 'fa fa-folder-o'
+            }
+          }
+        });
+        
+        // abre todos os nodes
+        $('#tree').jstree('open_all');
+        if("{{tag}}") {
+          window.location.hash = "{{tag}}"; 
+        }
+      });
+      
+      // muda o ícone quando ocorrer evento abrir pasta
+      $("#tree").on('open_node.jstree', function (event, data) {
+        data.instance.set_type(data.node,'f-open');
+      });
+      // muda o ícone quando ocorrer evento fechar pasta
+      $("#tree").on('close_node.jstree', function (event, data) {
+        data.instance.set_type(data.node,'f-closed');
+      });
+
+      // Abre toda a árvore quando um node é selecionado
+      // $('#tree').on("select_node.jstree", function (e, data) { 
+      //   $('#tree').jstree('open_all');
+      // }); 
+    </script>
+
+  {% endif %}
+
+{% endblock %}
