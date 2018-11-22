@@ -1,1 +1,0 @@
-{'name': 'tretert', 'university': 'rtertre', 'academic_id': 5654654, 'buha_id': None}
