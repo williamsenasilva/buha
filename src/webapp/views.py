@@ -1,5 +1,4 @@
 from flask import Flask, request, render_template, redirect, url_for, flash, Markup, session, send_file, json, jsonify
-import requests
 import os
 import glob
 import calendar

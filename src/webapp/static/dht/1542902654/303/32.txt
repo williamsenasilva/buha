@@ -1,0 +1,1 @@
+{'name': 'xcxzc', 'university': 'cxzcxz', 'academic_id': 32, 'buha_id': 32}
