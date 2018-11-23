@@ -10,6 +10,7 @@ from helper import *
 import ast 
 import random
 
+
 app = Flask(__name__)
 app.config.from_object('config')
 
@@ -96,11 +97,39 @@ def insert_student():
     dht = create_dht(session)
     student.buha_id = dht.get_hash_id(student.academic_id)
     dht.store(dht.start_node, student.academic_id, student)
+
     new_file = app.root_path + '/static/dht/' + session.get('moment') + '/' + str(dht.find_node(dht.start_node, student.academic_id)._id) + '/' + str(student.academic_id) + '.txt'
     create_file(new_file, str(student.__dict__).upper())
     message = Markup("Aluno <b>" + student.name + "</b> foi inserido")
     flash(message,'success')
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
+
+@app.route('/api/search-student/<int:academicId>')
+def search_student(academicId):
+    print("\33[31m ACADEMIC ID IS {} \33[0m".format(str(academicId)))
+    # Get Request Args
+    
+    if academicId is None:
+        print("\33[31m ACADEMIC ID IS NONE \33[0m")
+        return 
+    
+    dht = create_dht(session)
+    node = dht.find_node(dht.start_node, academicId)
+    path = app.root_path + '/static/dht/' + session.get('moment') + '/'
+    path += str(node._id) + '/' + str(academicId)+'.txt'
+    
+    # Se o estudante existir, retorna ele, caso contrário, retorna None:
+    student = student_from_file(path)        
+    
+    if student is not None:
+        return "Aluno localizado em {}: {}{}".format(str(node._id), str(student.name), str(student))
+    else:
+        return "Aluno não localizado."
+
+
+
+
+    # 
 
 # todo: mover para helper.py
 def create_dht(session):
