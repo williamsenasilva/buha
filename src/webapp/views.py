@@ -5,7 +5,7 @@ import calendar
 import time
 from models import *
 from random import randint
-from dht import Node, DHT
+from dht import Node, DHT, student_from_file, make_path_for
 from helper import *
 import ast 
 import random
@@ -59,8 +59,6 @@ def insert_students():
         dht = create_dht(session)
         student.buha_id = dht.get_hash_id(student.academic_id)
         dht.store(dht.start_node, student.academic_id, student)
-        new_file = app.root_path + '/static/dht/' + session.get('moment') + '/' + str(dht.find_node(dht.start_node, student.academic_id)._id) + '/' + str(student.academic_id) + '.txt'
-        create_file(new_file, str(student.__dict__).upper())
     message = Markup("Mais 100 alunos foram inseridos automaticamente")
     flash(message,'success')
     return redirect(url_for('home'))
@@ -98,8 +96,6 @@ def insert_student():
     student.buha_id = dht.get_hash_id(student.academic_id)
     dht.store(dht.start_node, student.academic_id, student)
 
-    new_file = app.root_path + '/static/dht/' + session.get('moment') + '/' + str(dht.find_node(dht.start_node, student.academic_id)._id) + '/' + str(student.academic_id) + '.txt'
-    create_file(new_file, str(student.__dict__).upper())
     message = Markup("Aluno <b>" + student.name + "</b> foi inserido")
     flash(message,'success')
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
@@ -141,10 +137,12 @@ def remove_student(academic_id):
 
 # todo: mover para helper.py
 def create_dht(session):
-    dht = DHT(10)
+    dht = DHT(10, session, app)
     path = app.root_path + '/static/dht/' + str(session.get('moment'))
     for root, dirs, files in os.walk(path, topdown=False):
         for name in dirs:
-            dht.join(Node(int(name)))
+            node = Node(int(name))
+            dht.join(node)
+           
     dht.update_all_tables()
     return dht
