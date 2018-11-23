@@ -106,18 +106,15 @@ def insert_student():
 
 @app.route('/api/search-student/<int:academicId>')
 def search_student(academicId):
-    print("\33[31m ACADEMIC ID IS {} \33[0m".format(str(academicId)))
-    # Get Request Args
-    
     if academicId is None:
         print("\33[31m ACADEMIC ID IS NONE \33[0m")
         return 
     
     dht = create_dht(session)
     node = dht.find_node(dht.start_node, academicId)
-    path = app.root_path + '/static/dht/' + session.get('moment') + '/'
-    path += str(node._id) + '/' + str(academicId)+'.txt'
-    
+    # path = app.root_path + '/static/dht/' + session.get('moment') + '/'
+    # path += str(node._id) + '/' + str(academicId)+'.txt'
+    path = make_path_for(dht, session, app, node_id=node._id, academic_id=academicId)
     # Se o estudante existir, retorna ele, caso contrário, retorna None:
     student = student_from_file(path)        
     
@@ -126,10 +123,21 @@ def search_student(academicId):
     else:
         return "Aluno não localizado."
 
-
-
-
-    # 
+@app.route('/api/remove-student/<int:academic_id>')
+def remove_student(academic_id):
+    #academic_id = request.args.get('academicId', default=None)
+    if academic_id is None:
+        return "Não há aluno para excluir."
+    
+    dht = create_dht(session)
+    path = make_path_for(dht, session, app, academic_id=academic_id)
+    student = student_from_file(path)
+    if student is not None:
+        os.remove(path)
+        return "Estudante {} Removido.".format(student.name)
+    else:
+        return "Estudante não encontrado."
+    
 
 # todo: mover para helper.py
 def create_dht(session):
