@@ -1,1 +1,0 @@
-{'name': 'dsaasd', 'university': 'xczc', 'academic_id': 998, 'buha_id': 998}

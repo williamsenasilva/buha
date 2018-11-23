@@ -1,6 +1,4 @@
 $(document).ready(function() {
-  $("#insert-server").on('click', insertServer);
-  $("#insert-students").on('click', insertStudents);
 });
 
 function insertStudent() {
@@ -18,39 +16,7 @@ function insertStudent() {
       window.location.reload();
     },
     error: function(error){
-      // alert("Erro. Por favor tente novamente.\nErro:" + error);
-    }
-  }); 
-}
-
-function insertServer() {
-  $.ajax({
-    type: "POST",
-    url: "/api/insert-server",
-    contentType: 'application/json;charset=UTF-8',
-    timeout: 30000,
-    success: function() {
-      window.location.reload();
-    },
-    error: function(error){
-      console.log(error);
-      // alert("Erro. Por favor tente novamente.\nErro:" + error);
-    }
-  }); 
-}
-
-function insertStudents() {
-  $.ajax({
-    type: "POST",
-    url: "/api/insert-students",
-    contentType: 'application/json;charset=UTF-8',
-    timeout: 30000,
-    success: function() {
-      window.location.reload();
-    },
-    error: function(error){
-      console.log(error);
-      // alert("Erro. Por favor tente novamente.\nErro:" + error);
+      alert("Erro. Por favor tente novamente.\nErro:" + error);
     }
   }); 
 }

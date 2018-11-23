@@ -50,6 +50,30 @@ def logout():
     session.clear()
     return redirect(url_for('home'))
 
+@app.route('/insert-students')
+def insert_students():
+    students = random.sample(app.config['STUDENTS'], 100)
+    for student in students:
+        student = Student(student)
+        dht = create_dht(session)
+        student.buha_id = dht.get_hash_id(student.academic_id)
+        dht.store(dht.start_node, student.academic_id, student)
+        new_file = app.root_path + '/static/dht/' + session.get('moment') + '/' + str(dht.find_node(dht.start_node, student.academic_id)._id) + '/' + str(student.academic_id) + '.txt'
+        create_file(new_file, str(student.__dict__).upper())
+    message = Markup("Mais 100 alunos foram inseridos automaticamente")
+    flash(message,'success')
+    return redirect(url_for('home'))
+
+@app.route('/insert-server')
+def insert_server():
+    new_folder = app.root_path + '/static/dht/' + session.get('moment') + '/' + str(randint(0,1024))
+    if not os.path.exists(new_folder):
+        os.makedirs(new_folder)
+    dht = create_dht(session)
+    message = Markup("Um novo servidor foi adicionado")
+    flash(message,'success')
+    return redirect(url_for('home'))
+
 @app.route('/files/', defaults={'request_path': ''})
 @app.route('/files/<path:request_path>')
 def files(request_path):
@@ -69,45 +93,14 @@ def files(request_path):
 def insert_student():
     data = request.get_json(force=True, silent=False, cache=False)
     student = Student(data)
-
     dht = create_dht(session)
     student.buha_id = dht.get_hash_id(student.academic_id)
     dht.store(dht.start_node, student.academic_id, student)
-
     new_file = app.root_path + '/static/dht/' + session.get('moment') + '/' + str(dht.find_node(dht.start_node, student.academic_id)._id) + '/' + str(student.academic_id) + '.txt'
-    create_file(new_file, str(student.__dict__))
-
+    create_file(new_file, str(student.__dict__).upper())
     message = Markup("Aluno <b>" + student.name + "</b> foi inserido")
     flash(message,'success')
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
-
-@app.route('/api/insert-students',methods=['POST'])
-def insert_students():
-    students = random.sample(app.config['STUDENTS'], 100)
-    for student in students:
-        student = Student(student)
-        dht = create_dht(session)
-        student.buha_id = dht.get_hash_id(student.academic_id)
-        dht.store(dht.start_node, student.academic_id, student)
-        new_file = app.root_path + '/static/dht/' + session.get('moment') + '/' + str(dht.find_node(dht.start_node, student.academic_id)._id) + '/' + str(student.academic_id) + '.txt'
-        create_file(new_file, str(student.__dict__))
-    message = Markup("100 alunos foram inseridos")
-    flash(message,'success')
-    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
-
-
-@app.route('/api/insert-server',methods=['POST'])
-def insert_server():
-    new_folder = app.root_path + '/static/dht/' + session.get('moment') + '/' + str(randint(0,1024))
-    if not os.path.exists(new_folder):
-        os.makedirs(new_folder)
-    
-    dht = create_dht(session)
-
-    message = Markup("Um novo servidor foi adicionado")
-    flash(message,'success')
-    return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
-
 
 # todo: mover para helper.py
 def create_dht(session):
